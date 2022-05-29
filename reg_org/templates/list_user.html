@@ -1,0 +1,17 @@
+<h1>you will get here after login</h1>
+
+{% if user.is_authenticated %}
+    <p>You are logged in</p>
+    <p> Welcome {{user.get_username}} </p>
+    <p> 
+        <a href="/root/logout">Logout</a>
+    </p>
+{% else %}
+    <p>You are logged out</p>
+    <p>
+        <a href="/root/login">Login</a>
+    </p>
+
+{% endif %}
+
+
