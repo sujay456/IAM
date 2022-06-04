@@ -1,6 +1,8 @@
 from django import forms
+from django.contrib.auth.models import User
 
 class RegisterationForm(forms.Form):
+    
     username = forms.CharField(max_length=100,widget=forms.TextInput(attrs={'class': 'form-control','placeholder':'Username'}))
     email = forms.EmailField(max_length=100,widget=forms.TextInput(attrs={'class': 'form-control','placeholder':'email'}))
     organization = forms.CharField(label='Organization',max_length=100,widget=forms.TextInput(attrs={'class': 'form-control','placeholder':'Organization'}))
@@ -19,4 +21,31 @@ class LoginForm(forms.Form):
     
     password.widget.attrs.update({'class': 'form-control'})
     password.widget.attrs.update({'placeholder': 'Password'})
+    
+
+class EmployeeRegForm(forms.ModelForm):
+    class Meta:
+        model=User 
+        fields=['username', 'email','password']
+        
+
+class EmployeeUpdForm(forms.Form):
+    
+    username = forms.CharField(max_length=100,widget=forms.TextInput(attrs={'class': 'form-control','placeholder':'Username'}))
+    email = forms.EmailField(max_length=100,widget=forms.TextInput(attrs={'class': 'form-control','placeholder':'email'}))
+    
+    
+    EMPLOYEE='em'
+    PROJECT_LEAD='pl'
+    MANAGER='mr'
+    
+    choices=[
+        (EMPLOYEE, 'EMPLOYEE'),
+        (PROJECT_LEAD, 'PROJECT_LEAD'),
+        (MANAGER, 'MANAGER')
+    ]   
+    
+    
+    prem=forms.ChoiceField(choices=choices)
+    
     

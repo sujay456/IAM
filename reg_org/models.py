@@ -10,5 +10,30 @@ class Organization(models.Model):
     
     head_user=models.ForeignKey(User, on_delete=models.CASCADE,null=True)
     
+    def __str__(self):
+        
+        return f"{self.org_name} - {self.head_user.username}"
     
+class IsRoot(models.Model):
+    is_root=models.BooleanField(default=False)
+    
+    user=models.ForeignKey(User, on_delete=models.CASCADE,null=True)
+    
+class PartOf(models.Model):
+    
+    org=models.ForeignKey(Organization, on_delete=models.CASCADE,null=True)
+    
+    emp=models.ForeignKey(User, on_delete=models.CASCADE,null=True) 
+    
+    EMPLOYEE='em'
+    PROJECT_LEAD='pl'
+    MANAGER='mr'
+    
+    choices=[
+        (EMPLOYEE, 'EMPLOYEE'),
+        (PROJECT_LEAD, 'PROJECT_LEAD'),
+        (MANAGER, 'MANAGER')
+    ]   
+    
+    prem=models.CharField(max_length=2,choices=choices,default=EMPLOYEE)
     

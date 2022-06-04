@@ -1,8 +1,49 @@
+{% extends 'base.html'%}
+
+{% block body%}
+
 <h1>you will get here after login</h1>
 
 {% if user.is_authenticated %}
-    <p>You are logged in</p>
     <p> Welcome {{user.get_username}} </p>
+    
+    <form  method="post">
+        {% csrf_token %}
+
+        <div class="form-row">
+            <div class="col">
+                {{form.username.label_tag}}
+                {{form.username}}
+
+            </div>
+            <div class="col">
+                {{form.email.label_tag}}
+                {{form.email}}
+
+            </div>
+            <div class="col">
+                {{form.password.label_tag}}
+                {{form.password}}
+
+            </div>
+            <div class="col">
+               <input type="submit" value="Add User">
+            </div>
+            
+        </div>
+    </form>
+    <h3>Total number of Employees: {{num_of_users}}</h3>
+    <h1>List of all Employees </h1>
+    <ul>
+
+        {% for emp in emps%}
+            <li>
+                <a href="{% url 'detail' emp.emp.id%}">
+                    <p>{{emp.emp.username}} - {{emp.prem}} </p>
+                </a>
+            </li>
+        {%endfor%}
+    </ul>
     <p> 
         <a href="/root/logout">Logout</a>
     </p>
@@ -13,5 +54,7 @@
     </p>
 
 {% endif %}
+
+{% endblock %}
 
 
