@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+import uuid
 # Create your models here.
 
 class Organization(models.Model):
@@ -9,6 +10,8 @@ class Organization(models.Model):
     num_of_users=models.IntegerField(default=0)
     
     head_user=models.ForeignKey(User, on_delete=models.CASCADE,null=True)
+    
+    client_secret=models.UUIDField(default=uuid.uuid4,editable=False)
     
     def __str__(self):
         

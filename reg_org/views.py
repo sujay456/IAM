@@ -11,7 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 
 from django.contrib import messages
-
+import uuid
 
 def regOrgView(request):
     if request.user.is_authenticated:
@@ -36,8 +36,8 @@ def regOrgView(request):
             user=User(username=username,email=email)
             user.set_password(p1)
             user.save()
-            
-            org=Organization(org_name=organization,num_of_users=0,head_user=user)
+            client_secret=uuid.uuid4()
+            org=Organization(org_name=organization,num_of_users=0,head_user=user,client_secret=client_secret)
             org.save()
             
             IsRoot.objects.create(is_root=True,user=user)
@@ -107,7 +107,8 @@ def listView(request):
             form=EmployeeRegForm()
                 
         all_emps=PartOf.objects.filter(org=org)
-        return render(request,'list_user.html',{'form':form,'num_of_users':org.num_of_users,'emps':all_emps})
+        print(org.client_secret)
+        return render(request,'list_user.html',{'form':form,'num_of_users':org.num_of_users,'emps':all_emps,'client_secret':org.client_secret})
     
     except ObjectDoesNotExist:
         return render(request,'error.html',{'error':'data not found'})
@@ -138,7 +139,7 @@ def empDetails(request,pk):
                 messages.success(request,"changes updated successfully")
 
         form=EmployeeUpdForm({'username':user.username,'email':user.email,'prem':emp.prem})    
-
+        
         return render(request,'empDetail.html',{'name':emp.emp.username,'org':emp.org.org_name,'prem_level':emp.prem,'form':form})
     except IntegrityError as e:
         return render(request,'error.html',{'error':'Cannot update'})
