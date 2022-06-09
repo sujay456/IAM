@@ -1,6 +1,7 @@
+from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from .serializer import LoginSerializer
+from rest_framework.decorators import api_view, permission_classes
+from .serializer import LoginSerializer,LogoutSerializer
 from django.contrib.auth import authenticate,login
 import jwt
 import datetime
@@ -8,6 +9,10 @@ from django.utils import timezone
 from reg_org.models import Organization
 import uuid
 from django.core.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.tokens import TokenError
+
+
 @api_view(['POST'])
 def login_view(request,org):
     try:
@@ -59,3 +64,20 @@ def login_view(request,org):
             return Response({'error':'Invalid URL'})
     except ValidationError as v:
         return Response({'errorTE':v.__cause__})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout_view(request,org):
+    
+    try:
+        serializer =LogoutSerializer(data=request.data)
+
+        if serializer.is_valid():
+            
+            # there is a custom save method in the serializer class
+            serializer.save()
+            
+            return Response(status=status.HTTP_204_NO_CONTENT)
+    except TokenError as e:
+        return Response({'error':"Token BlackListed"})
+        
