@@ -2,36 +2,29 @@
 
 {% block body%}
 
-<h1>you will get here after login</h1>
 
 {% if user.is_authenticated %}
     <p> Welcome {{user.get_username}} </p>
     
-    <form  method="post">
-        {% csrf_token %}
+    <p>
+        <a href="{% url 'register_permission'%}">Register Permissions</a>
 
-        <div class="form-row">
-            <div class="col">
-                {{form.username.label_tag}}
-                {{form.username}}
+    </p>
+    
+    <p>
+        <a href="{% url 'add_user' %}">Add user</a>
 
-            </div>
-            <div class="col">
-                {{form.email.label_tag}}
-                {{form.email}}
+    </p>
 
-            </div>
-            <div class="col">
-                {{form.password.label_tag}}
-                {{form.password}}
+    <h4>List of all the Permissions</h4>
+    <ul>
+        {% for p in permissions%}
+            <li>
+                {{p.permission_name}}
+            </li>
+        {% endfor %}
+    </ul>
 
-            </div>
-            <div class="col">
-               <input type="submit" value="Add User">
-            </div>
-            
-        </div>
-    </form>
     <h3>Total number of Employees: {{num_of_users}}</h3>
     <h1>List of all Employees </h1>
     <ul>

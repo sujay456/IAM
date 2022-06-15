@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $( document ).ready(function() {
+            username=localStorage.getItem("username")
+            const userHeader=document.querySelector('.user_header')
+            userHeader.innerHTML=`<p> Hello ${username} </p>`
+        });
+     
+        const logout=()=>{
+            $.ajax({
+                url:'http://localhost:8000/api/samsung/logout',
+                type:'POST',
+                data:{'refresh':localStorage.getItem('refresh_token')},
+                headers:{'Authorization':'Bearer '+localStorage.getItem('access_token')},
+                success:(data)=>{
+                    console.log("Logged out successfully",data)
+                    window.location.href="http://127.0.0.1:5500/dummy/login.html"
+                }
+
+            })
+        }
+        const featPermMap={
+            'feature1':['perm-1'],
+            'feature2':['perm-2'],
+            'feature3':['perm-1','perm-2'],
+        }
+        const feature=(feature)=>{
+
+            $.ajax({
+                url:'http://localhost:8000/api/samsung/getperm',
+                type:'GET',
+                headers:{'Authorization':'Bearer '+localStorage.getItem('access_token')},
+                success:(data)=>{
+                    let perms=data.permissions
+                    
+                    let permsMap={}
+                    for(p of perms)
+                        permsMap[p]=true
+                    var allowed=true
+                    for(let p of featPermMap['feature'+feature])
+                    {
+                        let x=permsMap[p]
+                        if(!x)
+                            allowed=false
+                    }
+                    console.log(allowed)
+                    if(allowed)
+                        window.location.href="feature"+feature+".html"
+                }
+            })
+        }
+        </script>
+</head>
+<body>
+    Redirected here after login 
+
+    <h1 class="user_header"></h1>
+
+
+
+    <h2> <a href="#" onclick="feature(1)">Feature-1</a> </h2>
+    <ul>
+        <li>prem-1</li>
+    </ul>
+    
+    <h2> <a href="#" onclick="feature(2)">Feature-2</a> </h2>
+    <ul>
+        <li>prem-2</li>
+    </ul>
+    
+    <h2> <a href="#" onclick="feature(3)">Feature-3</a> </h2>
+    <ul>
+        <li>prem-1</li>
+        <li>prem-2</li>
+        
+    </ul>
+    <a href="#" class="logout" onclick="logout()">logout</a>
+    
+    
+    <!-- <script src="index.js"></script> -->
+</body>
+</html>

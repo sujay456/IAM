@@ -28,15 +28,18 @@ class PartOf(models.Model):
     
     emp=models.ForeignKey(User, on_delete=models.CASCADE,null=True) 
     
-    EMPLOYEE='em'
-    PROJECT_LEAD='pl'
-    MANAGER='mr'
+
     
-    choices=[
-        (EMPLOYEE, 'EMPLOYEE'),
-        (PROJECT_LEAD, 'PROJECT_LEAD'),
-        (MANAGER, 'MANAGER')
-    ]   
+class Permissions(models.Model):
+    org=models.ForeignKey(Organization, on_delete=models.CASCADE,null=True)
     
-    prem=models.CharField(max_length=2,choices=choices,default=EMPLOYEE)
+    permission_name=models.CharField(max_length=100)
+    
+    def __str__(self):
+        return self.permission_name
+
+class UserPermissions(models.Model):
+    emp=models.ForeignKey(User, on_delete=models.CASCADE,null=True)
+    
+    perm_name=models.ForeignKey(Permissions, on_delete=models.CASCADE,null=True)
     

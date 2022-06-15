@@ -6,13 +6,13 @@ from django.contrib.auth import authenticate,login
 import jwt
 import datetime
 from django.utils import timezone
-from reg_org.models import Organization
+from reg_org.models import Organization,UserPermissions
 import uuid
 from django.core.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import TokenError
-
-
+from django.contrib.auth.models import User
+from rest_framework_simplejwt.tokens import RefreshToken
 @api_view(['POST'])
 def login_view(request,org):
     try:
@@ -36,16 +36,14 @@ def login_view(request,org):
                     if user is not None:
                         # as the user exist in the database , we now need to generate a jwt token 
                         # now i can decide what things i can give to encode the payload
-                        encoded=jwt.encode({
-                            "id":user.id,
-                            "username":user.username,
-                            "exp": datetime.datetime.now(tz=timezone.utc) + datetime.timedelta(seconds=300),
-                            "iat": datetime.datetime.now(tz=timezone.utc)},"secret_key",algorithm="HS256")
+                        refresh = RefreshToken.for_user(user)
                         
                                         
                         data={
                             'message':'Logged in sucessfully',
-                            'access_token':encoded
+                            'access_token':str(refresh.access_token),
+                            'refresh_token':str(refresh),
+                            'username':user.username
                         }
                         
                         return Response(data)
@@ -56,7 +54,7 @@ def login_view(request,org):
                             'message':'Invalid credentials'
                             
                         }
-                        return Response(data)
+                        return Response(data=data,status=status.HTTP_403_FORBIDDEN)
                         
                 else:
                     return Response({'error':serializer.errors})
@@ -80,4 +78,21 @@ def logout_view(request,org):
             return Response(status=status.HTTP_204_NO_CONTENT)
     except TokenError as e:
         return Response({'error':"Token BlackListed"})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_permissions_view(request,org):
+    
+    try:
+        user=User.objects.get(username=request.user)
+        permObj=UserPermissions.objects.filter(emp=user)
         
+        perms=[]
+        
+        for p in permObj:
+            perms.append(p.perm_name.permission_name)
+        print(perms)
+        return Response({'permissions':perms})
+    except :
+        return Response({'error':"Internal Server Error"})

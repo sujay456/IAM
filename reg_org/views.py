@@ -1,11 +1,11 @@
 from django.shortcuts import render,redirect
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .models import Organization,IsRoot,PartOf
+from .models import Organization,IsRoot,PartOf,Permissions,UserPermissions
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.decorators import login_required
 # Create your views here.
-from .form import RegisterationForm,LoginForm,EmployeeRegForm,EmployeeUpdForm
+from .form import RegisterationForm,LoginForm,EmployeeRegForm,EmployeeUpdForm,PermissionRegisterForm,EmployeePermissionForm
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
@@ -87,28 +87,9 @@ def listView(request):
     
     try:
         org=Organization.objects.get(head_user=request.user)
-        
-        if request.method =='POST':
-            form=EmployeeRegForm(request.POST)
-            
-            if form.is_valid():
-                
-                emp=form.save(commit=False)
-
-                emp.set_password(form.cleaned_data['password'])
-                emp.save()
-                
-                IsRoot.objects.create(is_root=False,user=emp)
-                org.num_of_users+=1;
-                org.save()
-                
-                PartOf.objects.create(org=org,emp=emp)
-        else:
-            form=EmployeeRegForm()
-                
+        permissions=Permissions.objects.all()
         all_emps=PartOf.objects.filter(org=org)
-        print(org.client_secret)
-        return render(request,'list_user.html',{'form':form,'num_of_users':org.num_of_users,'emps':all_emps,'client_secret':org.client_secret})
+        return render(request,'list_user.html',{'num_of_users':org.num_of_users,'emps':all_emps,'client_secret':org.client_secret,'permissions':permissions})
     
     except ObjectDoesNotExist:
         return render(request,'error.html',{'error':'data not found'})
@@ -127,22 +108,82 @@ def empDetails(request,pk):
             if form.is_valid():
                 username=form.cleaned_data['username']
                 email=form.cleaned_data['email']
-                prem=form.cleaned_data['prem']
                 
                 user.username=username
                 user.email=email
                 user.save()
                 
-                emp.prem=prem
                 
-                emp.save()            
                 messages.success(request,"changes updated successfully")
 
-        form=EmployeeUpdForm({'username':user.username,'email':user.email,'prem':emp.prem})    
+        form=EmployeeUpdForm({'username':user.username,'email':user.email})    
         
-        return render(request,'empDetail.html',{'name':emp.emp.username,'org':emp.org.org_name,'prem_level':emp.prem,'form':form})
+        return render(request,'empDetail.html',{'name':emp.emp.username,'org':emp.org.org_name,'form':form})
     except IntegrityError as e:
         return render(request,'error.html',{'error':'Cannot update'})
+
+@login_required
+def addUserView(request):
+    try:
+        org=Organization.objects.get(head_user=request.user)
+        perms=Permissions.objects.filter(org=org)
+        if request.method =='POST':
+            form=EmployeeRegForm(request.POST,prefix=org)
+            
+            if form.is_valid():
+                
+                print(form.cleaned_data)
+                username=form.cleaned_data['username']
+                password=form.cleaned_data['password']
+                email=form.cleaned_data['email']
+                user=User.objects.create(username=username,email=email)
+
+                user.set_password(password)
+                user.save()
+
+                IsRoot.objects.create(is_root=False,user=user)
+                org.num_of_users+=1;
+                org.save()
+                
+                PartOf.objects.create(org=org,emp=user)
+                
+                for p in perms:
+                    if form.cleaned_data[p.permission_name]:
+                        UserPermissions.objects.create(emp=user,perm_name=p)
+                
+                messages.success(request,"user created successfully")
+                
+                return redirect('list')
+        else:
+            form=EmployeeRegForm(prefix=org)
+                
+        # print(org.client_secret)
+        return render(request,'add_user.html',{'form':form,'perms':perms})
+    
+    except ObjectDoesNotExist:
+        return render(request,'error.html',{'error':'data not found'})
+    
+def registerPermissionView(request):
+    
+    try:
+        org=Organization.objects.get(head_user=request.user)
+        
+        if request.method == 'POST':
+            form=PermissionRegisterForm(request.POST)
+            
+            if form.is_valid():
+                perm=Permissions.objects.create(org=org,permission_name=form.cleaned_data['permission_name'])
+                print(perm)
+                messages.success(request,f"Permission {perm.permission_name} added successfully")
+            else:
+                messages.error(request,"error in form")
+        else:
+            form=PermissionRegisterForm()
+        
+        return render(request,'add_permission.html',{'form':form})
+    except ObjectDoesNotExist:
+        return render(request,'error.html',{'error':'data not found'})
+        
 def logoutView(request):
     logout(request)
     
