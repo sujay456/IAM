@@ -1,0 +1,36 @@
+
+name: Djanjo Tests
+
+
+on :
+  push: 
+    branches: [ "main" ]
+
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: setup python 3.10.4
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.10.4
+      
+    - name: Install Dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip install -r requirement.txt
+
+    - name: Coverage report
+      run: |
+        pip install coverage
+        coverage run manage.py test
+        coverage report
+    - name: Django Testing
+      run : |
+        python3 manage.py test
