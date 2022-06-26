@@ -10,3 +10,6 @@ server {
         proxy_pass http://unix:/run/gunicorn.sock;
     }
 }
+
+docker build --tag IAM-django
+docker run --publish 8000:8000 IAM-django
