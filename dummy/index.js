@@ -4,7 +4,7 @@ const messageContainer=document.querySelector('.message')
 // console.log(loginForm)
 const client_secret='b9009fbd-cd7e-4289-8c82-59e91a078374'
 
-
+const base_url="http://3.110.132.231/"
 var UserToken
 loginForm.addEventListener("submit",(e)=>{
     e.preventDefault()
@@ -12,7 +12,7 @@ loginForm.addEventListener("submit",(e)=>{
     password=e.target.password.value
     
     $.ajax({
-        url:"http://localhost:8000/api/samsung/login/",
+        url:base_url+"api/samsung/login/",
         type:"POST",
         data:{'username':username, 'password':password},
         headers:{'client-secret':client_secret},

@@ -12,10 +12,10 @@
             const userHeader=document.querySelector('.user_header')
             userHeader.innerHTML=`<p> Hello ${username} </p>`
         });
-     
+        const base_url="http://3.110.132.231/"
         const logout=()=>{
             $.ajax({
-                url:'http://localhost:8000/api/samsung/logout',
+                url:base_url+'api/samsung/logout',
                 type:'POST',
                 data:{'refresh':localStorage.getItem('refresh_token')},
                 headers:{'Authorization':'Bearer '+localStorage.getItem('access_token')},
@@ -34,7 +34,7 @@
         const feature=(feature)=>{
 
             $.ajax({
-                url:'http://localhost:8000/api/samsung/getperm',
+                url:base_url+'api/samsung/getperm',
                 type:'GET',
                 headers:{'Authorization':'Bearer '+localStorage.getItem('access_token')},
                 success:(data)=>{

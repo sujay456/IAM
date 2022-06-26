@@ -1,2 +1,12 @@
-docker build --tag python-django .
-docker run --publish 8000:8000 python-django
+server {
+    listen 80;
+    server_name 3.110.132.231;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/run/gunicorn.sock;
+    }
+}
